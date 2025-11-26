@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 
 const products = [
   {
@@ -70,10 +72,25 @@ const products = [
 
 export default function Catalog() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   const filteredProducts = selectedCategory === 'all' 
     ? products 
     : products.filter(p => p.category === selectedCategory);
+
+  const handleAddToCart = (product: typeof products[0]) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+    });
+    toast({
+      title: 'Добавлено в корзину',
+      description: product.name,
+    });
+  };
 
   return (
     <section id="catalog" className="py-16 md:py-24">
@@ -127,7 +144,12 @@ export default function Catalog() {
                 </div>
               </CardContent>
               <CardFooter className="p-6 pt-0">
-                <Button className="w-full" variant={product.inStock ? 'default' : 'outline'}>
+                <Button 
+                  className="w-full" 
+                  variant={product.inStock ? 'default' : 'outline'}
+                  onClick={() => product.inStock && handleAddToCart(product)}
+                  disabled={!product.inStock}
+                >
                   <Icon name="ShoppingCart" className="mr-2 h-4 w-4" />
                   {product.inStock ? 'В корзину' : 'Уточнить наличие'}
                 </Button>
